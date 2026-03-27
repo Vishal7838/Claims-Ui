@@ -1,10 +1,40 @@
 import MainLayout from '../layouts/MainLayout';
+import { useEffect, useState } from 'react';
 import { Search, Filter, Calendar, Plus, TrendingUp, MoreVertical } from 'lucide-react';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
-import { claims as claimsData } from '../data/claims';
 
 export default function ClaimsList() {
+  const [claimsData, setClaimsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/v1/claims');
+        if (!response.ok) throw new Error(`Failed to fetch claims (${response.status})`);
+        const data = await response.json();
+        if (mounted) {
+          setClaimsData(Array.isArray(data) ? data : []);
+          setError('');
+        }
+      } catch (e) {
+        if (mounted) {
+          setClaimsData([]);
+          setError(e?.message || 'Failed to load claims');
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <MainLayout>
       {/* KPI Cards section */}
@@ -80,7 +110,22 @@ export default function ClaimsList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-[13px] tracking-wide">
-              {claimsData.map((row) => (
+              {loading && (
+                <tr>
+                  <td colSpan={8} className="px-6 py-8 text-sm text-gray-500">Loading claims...</td>
+                </tr>
+              )}
+              {!loading && error && (
+                <tr>
+                  <td colSpan={8} className="px-6 py-8 text-sm text-red-600">{error}</td>
+                </tr>
+              )}
+              {!loading && !error && claimsData.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="px-6 py-8 text-sm text-gray-500">No claims found.</td>
+                </tr>
+              )}
+              {!loading && !error && claimsData.map((row) => (
                 <tr key={row.id} className="hover:bg-gray-50 transition-colors group">
                   <td className="pl-6 pr-4 py-5 font-bold">
                     <Link

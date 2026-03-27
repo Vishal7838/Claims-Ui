@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import clsx from "clsx";
@@ -20,7 +20,6 @@ import {
   TriangleAlert,
   User,
 } from "lucide-react";
-import { getClaimById } from "../data/claims";
 
 function clamp01(n) {
   if (!Number.isFinite(n)) return 0;
@@ -77,7 +76,39 @@ function RiskRing({ value = 0, className }) {
 
 export default function ClaimDetails() {
   const { claimId } = useParams();
-  const claim = useMemo(() => getClaimById(claimId), [claimId]);
+  const [claim, setClaim] = useState(null);
+  const [loadingClaim, setLoadingClaim] = useState(true);
+  const [claimError, setClaimError] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setLoadingClaim(true);
+        const response = await fetch(`/api/v1/claims/${encodeURIComponent(claimId || "")}`);
+        if (!response.ok) {
+          throw new Error(
+            response.status === 404 ? "Claim not found" : `Failed to fetch claim (${response.status})`
+          );
+        }
+        const data = await response.json();
+        if (mounted) {
+          setClaim(data || null);
+          setClaimError("");
+        }
+      } catch (e) {
+        if (mounted) {
+          setClaim(null);
+          setClaimError(e?.message || "Failed to load claim");
+        }
+      } finally {
+        if (mounted) setLoadingClaim(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [claimId]);
 
   const [patientOpen, setPatientOpen] = useState(true);
   const [providerOpen, setProviderOpen] = useState(true);
@@ -102,6 +133,22 @@ export default function ClaimDetails() {
       { label: "Plan link failed", tone: "error" },
     ],
   };
+
+  if (loadingClaim) {
+    return (
+      <MainLayout>
+        <div className="max-w-7xl mx-auto w-full py-8 text-sm text-gray-500">Loading claim details...</div>
+      </MainLayout>
+    );
+  }
+
+  if (claimError) {
+    return (
+      <MainLayout>
+        <div className="max-w-7xl mx-auto w-full py-8 text-sm text-red-600">{claimError}</div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
