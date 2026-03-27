@@ -4,6 +4,37 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Design tokens used by Claim Details screen
+        background: "#faf8ff",
+        surface: "#faf8ff",
+        "surface-dim": "#d2d9f4",
+        "surface-bright": "#faf8ff",
+        "surface-container-lowest": "#ffffff",
+        "surface-container-low": "#f2f3ff",
+        "surface-container": "#eaedff",
+        "surface-container-high": "#e2e7ff",
+        "surface-container-highest": "#dae2fd",
+        "surface-variant": "#dae2fd",
+        "on-background": "#131b2e",
+        "on-surface": "#131b2e",
+        "on-surface-variant": "#464555",
+        outline: "#777587",
+        "outline-variant": "#c7c4d8",
+        "primary-container": "#4f46e5",
+        "on-primary": "#ffffff",
+        error: "#ba1a1a",
+        "error-container": "#ffdad6",
+        "on-error": "#ffffff",
+        "on-error-container": "#93000a",
+        secondary: "#505f76",
+        "on-secondary": "#ffffff",
+        "secondary-container": "#d0e1fb",
+        "on-secondary-container": "#54647a",
+        tertiary: "#005338",
+        "tertiary-container": "#006e4b",
+        "on-tertiary": "#ffffff",
+        "on-tertiary-container": "#67f4b7",
+
         primary: {
           50: "#EEF2FF", // 95% light
           100: "#E0E7FF", // 90%
@@ -17,8 +48,6 @@ export default {
           900: "#1E1B4B", // -40%
         },
         sidebar: "#111827",
-        surface: "#ffffff",
-        background: "#f3f4f6",
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],

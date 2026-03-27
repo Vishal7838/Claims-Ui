@@ -1,14 +1,8 @@
 import MainLayout from '../layouts/MainLayout';
 import { Search, Filter, Calendar, Plus, TrendingUp, MoreVertical } from 'lucide-react';
 import clsx from 'clsx';
-
-const claimsData = [
-  { id: '#CLM-92834', patient: 'Eleanor Shellstrop', provider: 'St. Jude Medical', amount: '$12,450.00', status: 'UNDER REVIEW', aiScore: 84, submitted: 'Oct 24, 2023' },
-  { id: '#CLM-92835', patient: 'Chidi Anagonye', provider: 'General Health', amount: '$3,120.50', status: 'APPROVED', aiScore: 52, submitted: 'Oct 23, 2023' },
-  { id: '#CLM-92836', patient: 'Tahani Al-Jamil', provider: 'Beverly Hills Ortho', amount: '$45,000.00', status: 'FLAGGED', aiScore: 12, submitted: 'Oct 22, 2023' },
-  { id: '#CLM-92837', patient: 'Jason Mendoza', provider: 'FL Medical Group', amount: '$890.00', status: 'PENDING', aiScore: 91, submitted: 'Oct 21, 2023' },
-  { id: '#CLM-92838', patient: 'Michael Realman', provider: 'Phoenix Radiology', amount: '$2,400.00', status: 'APPROVED', aiScore: 76, submitted: 'Oct 20, 2023' },
-];
+import { Link } from 'react-router-dom';
+import { claims as claimsData } from '../data/claims';
 
 export default function ClaimsList() {
   return (
@@ -88,7 +82,14 @@ export default function ClaimsList() {
             <tbody className="divide-y divide-gray-100 text-[13px] tracking-wide">
               {claimsData.map((row) => (
                 <tr key={row.id} className="hover:bg-gray-50 transition-colors group">
-                  <td className="pl-6 pr-4 py-5 font-bold text-[#4f46e5]">{row.id}</td>
+                  <td className="pl-6 pr-4 py-5 font-bold">
+                    <Link
+                      to={`/claims/${encodeURIComponent(row.id)}`}
+                      className="text-[#4f46e5] hover:underline underline-offset-4"
+                    >
+                      #{row.id}
+                    </Link>
+                  </td>
                   <td className="px-4 py-5 font-bold text-gray-800">{row.patient}</td>
                   <td className="px-4 py-5 font-medium text-gray-500">{row.provider}</td>
                   <td className="px-4 py-5 font-extrabold text-gray-900">{row.amount}</td>

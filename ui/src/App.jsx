@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from "@azure/msal-react";
 import Dashboard from './pages/Dashboard';
 import ClaimsList from './pages/ClaimsList';
+import ClaimDetails from './pages/ClaimDetails';
 import Login from './pages/Login';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/claims" element={<ClaimsList />} />
+          <Route path="/claims/:claimId" element={<ClaimDetails />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthenticatedTemplate>
