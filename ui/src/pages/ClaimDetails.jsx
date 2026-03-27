@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import clsx from "clsx";
 import {
   ArrowLeft,
+  AlertCircle,
   Ban,
   Check,
   CheckCircle2,
@@ -27,10 +28,19 @@ function clamp01(n) {
 }
 
 function RiskRing({ value = 0, className }) {
-  const pct = clamp01(Number(value) / 100);
+  const targetPct = clamp01(Number(value) / 100);
+  const [animatedPct, setAnimatedPct] = useState(0);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      setAnimatedPct(targetPct);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [targetPct]);
+
   const r = 40;
   const c = 2 * Math.PI * r; // circumference
-  const dashOffset = c * (1 - pct);
+  const dashOffset = c * (1 - animatedPct);
   return (
     <div className={clsx("relative w-24 h-24", className)}>
       <svg className="w-full h-full -rotate-90">
@@ -54,10 +64,11 @@ function RiskRing({ value = 0, className }) {
           strokeDasharray={c}
           strokeDashoffset={dashOffset}
           strokeLinecap="round"
+          style={{ transition: "stroke-dashoffset 1200ms ease-out" }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-xl font-bold text-on-surface">{Math.round(pct * 100)}%</span>
+        <span className="text-xl font-bold text-on-surface">{Math.round(targetPct * 100)}%</span>
         <span className="text-[0.6rem] uppercase font-bold text-on-surface-variant">Risk</span>
       </div>
     </div>
@@ -80,6 +91,17 @@ export default function ClaimDetails() {
 
   const totalAmount = claim?.amount ?? "$4,850.00";
   const riskScore = claim?.aiScore ?? 84;
+  const resultSummary = {
+    message: "Eligibility check failed for submitted insurance details. Verify patient identifiers and retry linking.",
+    overallScore: 41,
+    reasonCodes: ["71", "72"],
+    checks: [
+      { label: "DOB match failed", tone: "error" },
+      { label: "Member ID match failed", tone: "error" },
+      { label: "Patient name match passed", tone: "success" },
+      { label: "Plan link failed", tone: "error" },
+    ],
+  };
 
   return (
     <MainLayout>
@@ -181,6 +203,51 @@ export default function ClaimDetails() {
                   <RiskRing value={riskScore} className="mb-3" />
                   <span className="text-[0.7rem] font-bold text-on-surface-variant">
                     Confidence: <span className="text-primary-600">92.4%</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Result Summary */}
+            <div className="bg-surface-container-low rounded-xl p-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <AlertCircle className="w-16 h-16" />
+              </div>
+
+              <div className="flex items-center gap-2 mb-1">
+                <AlertCircle className="w-5 h-5 text-primary-600" />
+                <h3 className="text-lg font-bold text-on-surface">Result Summary</h3>
+              </div>
+              <div className="mb-5" />
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="md:col-span-2">
+                  <p className="text-sm text-on-surface-variant leading-relaxed mb-5">{resultSummary.message}</p>
+
+                  <div className="flex flex-wrap gap-2">
+                    {resultSummary.checks.map((check) => {
+                      const isSuccess = check.tone === "success";
+                      return (
+                        <span
+                          key={check.label}
+                          className={clsx(
+                            "px-3 py-1.5 rounded-lg text-xs font-bold border",
+                            isSuccess
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                              : "bg-surface-container-high text-on-surface-variant border-transparent"
+                          )}
+                        >
+                          {check.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="bg-surface-container-lowest rounded-xl p-4 flex flex-col items-center justify-center border border-primary-500/5">
+                  <RiskRing value={resultSummary.overallScore} className="mb-3" />
+                  <span className="text-[0.7rem] font-bold text-on-surface-variant">
+                    Overall Match: <span className="text-primary-600">{resultSummary.overallScore}%</span>
                   </span>
                 </div>
               </div>
