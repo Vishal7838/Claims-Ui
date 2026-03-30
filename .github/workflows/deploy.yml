@@ -46,17 +46,24 @@ jobs:
             VITE_MSAL_AUTHORITY=${{ secrets.VITE_MSAL_AUTHORITY }}
             VITE_MSAL_REDIRECT_URI=${{ secrets.VITE_MSAL_REDIRECT_URI }}
 
-      - name: Deploy via DigitalOcean API
-        run: |
-          curl -X POST "https://api.digitalocean.com/v2/droplets/${{ secrets.DROPLET_ID }}/actions" \
-            -H "Authorization: Bearer ${{ secrets.DO_API_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "type": "run_command",
-              "command": "
-                docker pull ghcr.io/vishal7838/claims-ui:latest &&
-                docker stop vite-app || true &&
-                docker rm vite-app || true &&
-                docker run -d --name vite-app -p 8080:80 --restart unless-stopped ghcr.io/vishal7838/claims-ui:latest
-              "
-            }'
+      - name: Deploy to DigitalOcean Droplet
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            # Pull the new image
+            docker pull ${{ env.REGISTRY }}/${{ env.REPO }}:latest
+            
+            # Stop and remove the old container
+            docker stop vite-app || true
+            docker rm vite-app || true
+            
+            # Run the new container, mapping Droplet port 80 to Container port 80
+            docker run -d --name vite-app -p 8080:80 \
+              --restart unless-stopped \
+              ${{ env.REGISTRY }}/${{ env.REPO }}:latest
+            
+            # Clean up old unused images to save disk space
+            docker image prune -f
