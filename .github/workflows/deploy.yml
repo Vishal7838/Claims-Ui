@@ -55,7 +55,6 @@ jobs:
           script: |
             # Pull the new image
             docker pull ${{ env.REGISTRY }}/${{ env.REPO }}:latest
-
             # Stop and remove the old container
             docker stop vite-app || true
             docker rm vite-app || true
