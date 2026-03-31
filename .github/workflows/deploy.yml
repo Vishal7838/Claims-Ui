@@ -55,15 +55,15 @@ jobs:
           script: |
             # Pull the new image
             docker pull ${{ env.REGISTRY }}/${{ env.REPO }}:latest
-            
+
             # Stop and remove the old container
             docker stop vite-app || true
             docker rm vite-app || true
-            
+
             # Run the new container, mapping Droplet port 80 to Container port 80
             docker run -d --name vite-app -p 8080:80 \
               --restart unless-stopped \
               ${{ env.REGISTRY }}/${{ env.REPO }}:latest
-            
+
             # Clean up old unused images to save disk space
-            docker image prune -f
+            # docker image prune -f
