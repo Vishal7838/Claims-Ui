@@ -8,4 +8,10 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+  server: {
+    allowedHosts: ['claims-ui-latest.onrender.com']
+  },
+  preview: {
+    allowedHosts: ['claims-ui-latest.onrender.com']
+  }
 })
